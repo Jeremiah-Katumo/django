@@ -1,8 +1,12 @@
 
+from django import forms
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template.context import RequestContext
+from django.shortcuts import get_object_or_404, render_to_response
 from django.template import loader
 from django.db.models import Q
+
 from . import models
 
 # Create your views here.
@@ -51,3 +55,27 @@ def testingthree(request):
     'mymembers': mydata,
   }
   return HttpResponse(template.render(context, request))
+
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = models.Comment
+
+def add_comment(request, slug, template_name='templates/create.html'):
+    post = get_object_or_404(Entry, slug=slug)
+    remote_addr = request.META.get('REMOTE_ADDR')
+
+    if request.method == 'post':
+        form = CommentForm(request.POST, request.FILES)
+        if form.is_valid():
+            comment = form.save()
+            # check spam asynchronously
+            tasks.spam_filter.delay(comment_id=comment_id, remote_addr=remote_addr)
+            return HttpResponseRedirect(post.get_absolute_url())
+    else:
+        form = CommentForm()
+
+    context = RequestContext(request, {'form': form})
+    return render_to_response(template_name, context)
+        
