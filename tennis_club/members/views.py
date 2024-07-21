@@ -78,4 +78,3 @@ def add_comment(request, slug, template_name='templates/create.html'):
 
     context = RequestContext(request, {'form': form})
     return render_to_response(template_name, context)
-        
