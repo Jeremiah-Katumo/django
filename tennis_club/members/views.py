@@ -26,8 +26,27 @@ def main(request):
     return HttpResponse(template.render())
 
 def testing(request):
+    mydata = models.Member.objects.all()
     template = loader.get_template('template.html')
     context = {
         'fruits': ['Apple', 'Mango', 'Ovacado'],
+        'mymembers': mydata,
     }
     return HttpResponse(template.render(context, request))
+
+def testingtwo(request):
+    mydata = models.Member.objects.filter(firstname="Mile").values()
+    template = loader.get_template('template.html')
+    context = {
+        'fruits': ['Apple', 'Mango', 'Ovacado'],
+        'mymembers': mydata,
+    }
+    return HttpResponse(template.render(context, request))
+
+def testingthree(request):
+  mydata = models.Member.objects.filter(Q(firstname='Emil') | Q(firstname='Tobias')).values()
+  template = loader.get_template('template.html')
+  context = {
+    'mymembers': mydata,
+  }
+  return HttpResponse(template.render(context, request))
